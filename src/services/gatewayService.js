@@ -64,4 +64,4 @@ async function process(rawMessage) {
   return { answer, redacted };
 }
 
-module.exports = { process };
+module.exports = { process, breaker };

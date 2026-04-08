@@ -1,0 +1,63 @@
+{
+  "info": {
+    "name": "Guardian Integration Gateway – Demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 · Health Check",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/health"
+      }
+    },
+    {
+      "name": "2 · Sanitization + AI Answer",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "http://localhost:3000/secure-inquiry",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"demo-user\",\n  \"message\": \"Hi, reach me at john@company.com. My SSN is 123-45-6789 and card 4111-1111-1111-1111.\"\n}"
+        }
+      }
+    },
+    {
+      "name": "3 · Missing message (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "http://localhost:3000/secure-inquiry",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"demo-user\"\n}"
+        }
+      }
+    },
+    {
+      "name": "4 · Missing userId (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "http://localhost:3000/secure-inquiry",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Hello world\"\n}"
+        }
+      }
+    },
+    {
+      "name": "5 · Circuit Breaker OPEN (503 Service Busy)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "http://localhost:3000/secure-inquiry",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"demo-user\",\n  \"message\": \"Trigger circuit breaker test\"\n}"
+        }
+      }
+    }
+  ]
+}

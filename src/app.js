@@ -55,6 +55,15 @@ app.get('/health', (_req, res) => res.status(200).json({ status: 'ok' }));
 // Core gateway endpoint
 app.post('/secure-inquiry', validateInput, processInput);
 
+// Demo-only: force the circuit breaker open by recording N failures
+app.post('/demo/trip-breaker', (_req, res) => {
+  const { breaker } = require('./services/gatewayService');
+  for (let i = 0; i < breaker.failureThreshold; i++) {
+    breaker._onFailure();
+  }
+  res.status(200).json({ state: breaker.state, message: 'Circuit breaker tripped for demo.' });
+});
+
 // ---------------------------------------------------------------------------
 // Global error handler – must have 4 parameters for Express to treat it as one
 // ---------------------------------------------------------------------------
