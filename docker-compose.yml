@@ -1,0 +1,30 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # Set these in your .env file – never commit real values
+      - AUDIT_LOG_KEY=${AUDIT_LOG_KEY}
+      - CRYPTO_SALT=${CRYPTO_SALT}
+      - AUDIT_DB_PATH=/app/logs/audit-db.json
+    volumes:
+      # Persist encrypted audit logs outside the container
+      - ./logs:/app/logs
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      # Allow temp writes (e.g. npm cache) without a writable root fs
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
