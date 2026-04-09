@@ -1,5 +1,4 @@
 # Pitch Script – Guardian Integration Gateway
-### ~2–3 minutes | Senior-level presentation
 
 ---
 
@@ -55,4 +54,65 @@ This one is ready to run in production today.
 
 ---
 
-*Total estimated read-aloud time: ~2 minutes 30 seconds*
+
+
+---
+---
+
+# Guión de Presentación – Guardian Integration Gateway
+
+---
+
+**[APERTURA]**
+
+La mayoría de los sistemas backend hacen tres cosas mal: confían en entradas que no deberían, fallan ruidosamente cuando un servicio externo cae, y no tienen un registro confiable de lo que realmente ocurrió.
+
+Guardian Integration Gateway resuelve los tres problemas — de forma limpia, segura y a escala productiva.
+
+---
+
+**[SANITIZACIÓN DE ENTRADAS]**
+
+La primera capa es el sanitizador. El endpoint acepta `{ userId, message }` — y antes de que el mensaje salga de nuestro sistema, redactamos automáticamente la información sensible: correos electrónicos, números de tarjeta de crédito y números de seguridad social. No importa si están formateados, son parciales o están mezclados en texto libre. El patrón es detectado y reemplazado con una etiqueta clara: `<REDACTED: EMAIL>`, `<REDACTED: CREDIT_CARD>`, `<REDACTED: SSN>`.
+
+Los patrones regex fueron diseñados y revisados utilizando un flujo de trabajo de seguridad asistido por IA — generados por una persona con perfil senior de seguridad, luego auditados para detectar vulnerabilidades ReDoS y falsos positivos. El resultado está precompilado, anclado y evaluado en rendimiento.
+
+Nada sensible llega a un servicio externo. Punto.
+
+---
+
+**[LLAMADA MOCK A IA Y CIRCUIT BREAKER]**
+
+La segunda capa simula una integración con IA. Cada mensaje sanitizado se pasa a una llamada mock de IA — una operación asíncrona de dos segundos que devuelve `"Generated Answer"`. Simple, pero modela un límite de latencia real.
+
+Envolviendo esa llamada está el circuit breaker. Después de tres fallos consecutivos, el circuito se abre y dejamos de esperar. En lugar de hacer que el cliente espere dos segundos solo para recibir un error, respondemos instantáneamente con `"Service Busy"`. Después de diez segundos, permitimos una sola prueba. Si tiene éxito, el circuito se cierra. Si falla de nuevo, se vuelve a abrir.
+
+Esta es la diferencia entre un sistema que degrada con gracia y uno que arrastra todo lo que lo rodea — aislamiento controlado, con transiciones de estado registradas en tiempo real.
+
+---
+
+**[REGISTRO DE AUDITORÍA CIFRADO]**
+
+La tercera capa es la responsabilidad. Cada solicitud — exitosa o fallida — se escribe en una base de datos JSON simulada en disco. Pero no a ciegas. El mensaje original es cifrado con AES-256-GCM usando una clave derivada con PBKDF2 antes de almacenarse. La versión redactada — ya despojada de PII — se almacena en texto plano junto a ella.
+
+Obtienes lo mejor de ambos mundos: el original está protegido por cifrado autenticado, y la copia redactada es inmediatamente legible para auditorías y cumplimiento normativo. Si el texto cifrado es manipulado, el descifrado falla. Este es el tipo de registro de auditoría que resiste cualquier escrutinio.
+
+---
+
+**[ARQUITECTURA]**
+
+El sistema está organizado en capas limpias y desacopladas — seguridad HTTP en el borde con Helmet y limitación de tasa, luego middleware de validación de entradas, un controlador delgado, la capa de servicio que orquesta la sanitización y el circuit breaker, y finalmente las utilidades de seguridad en la base.
+
+Cada capa tiene un único trabajo. Nada se mezcla con nada más. Los nuevos desarrolladores pueden razonar sobre cualquier parte del sistema de forma aislada.
+
+---
+
+**[CIERRE]**
+
+Guardian Integration Gateway no es un framework — es un patrón. Sanitización de entradas. Integración resiliente. Registro a prueba de manipulaciones. Arquitectura limpia. Estos son los fundamentos de cualquier sistema backend serio.
+
+Este está listo para ejecutarse en producción hoy.
+
+---
+
+
